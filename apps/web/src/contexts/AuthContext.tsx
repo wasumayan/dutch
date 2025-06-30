@@ -13,9 +13,13 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ data: UserProfile | null; error: any }>;
+  resendConfirmationEmail: (email: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (password: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,6 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return await auth.signIn(email, password);
   };
 
+  const signInWithGoogle = async () => {
+    return await auth.signInWithGoogle();
+  };
+
   const signUp = async (email: string, password: string, name: string) => {
     const { data, error } = await auth.signUp(email, password, name);
     
@@ -73,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error: profileError } = await db.updateUserProfile({
         email,
         name,
+        provider: 'email',
         preferred_currency: 'USD',
         locale: 'en-US',
       });
@@ -97,15 +106,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { data, error };
   };
 
+  const resendConfirmationEmail = async (email: string) => {
+    return await auth.resendConfirmationEmail(email);
+  };
+
+  const resetPassword = async (email: string) => {
+    return await auth.resetPassword(email);
+  };
+
+  const updatePassword = async (password: string) => {
+    return await auth.updatePassword(password);
+  };
+
   const value = {
     user,
     profile,
     session,
     loading,
     signIn,
+    signInWithGoogle,
     signUp,
     signOut,
     updateProfile,
+    resendConfirmationEmail,
+    resetPassword,
+    updatePassword,
   };
 
   return (

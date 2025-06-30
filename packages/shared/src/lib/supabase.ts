@@ -26,6 +26,7 @@ export const auth = {
       password,
       options: {
         data: { name },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     return { data, error };
@@ -35,6 +36,16 @@ export const auth = {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+    });
+    return { data, error };
+  },
+
+  signInWithGoogle: async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     return { data, error };
   },
@@ -51,6 +62,31 @@ export const auth = {
 
   onAuthStateChange: (callback: (event: string, session: any) => void) => {
     return supabase.auth.onAuthStateChange(callback);
+  },
+
+  resetPassword: async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    return { data, error };
+  },
+
+  updatePassword: async (password: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password,
+    });
+    return { data, error };
+  },
+
+  resendConfirmationEmail: async (email: string) => {
+    const { data, error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    return { data, error };
   },
 };
 
@@ -81,6 +117,20 @@ export const db = {
       .select()
       .single();
 
+    return { data, error };
+  },
+
+  confirmUserEmail: async (userId: string) => {
+    const { data, error } = await supabase.rpc('confirm_user_email', {
+      user_id: userId,
+    });
+    return { data, error };
+  },
+
+  resendEmailConfirmation: async (email: string) => {
+    const { data, error } = await supabase.rpc('resend_email_confirmation', {
+      user_email: email,
+    });
     return { data, error };
   },
 

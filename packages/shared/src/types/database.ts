@@ -6,8 +6,11 @@ export interface User {
   email: string;
   name: string;
   avatar_url?: string;
+  provider: 'email' | 'google' | 'github';
   preferred_currency: string;
   locale: string;
+  email_confirmed_at?: string;
+  email_confirmation_sent_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +133,16 @@ export interface Database {
         Row: Settlement;
         Insert: Omit<Settlement, 'id' | 'created_at'>;
         Update: Partial<Omit<Settlement, 'id' | 'created_at'>>;
+      };
+    };
+    Functions: {
+      confirm_user_email: {
+        Args: { user_id: string };
+        Returns: boolean;
+      };
+      resend_email_confirmation: {
+        Args: { user_email: string };
+        Returns: boolean;
       };
     };
   };
